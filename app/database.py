@@ -17,6 +17,27 @@ db_params = {
 redis_conn = Redis(host = "0.0.0.0", port = 6379)
 queue = Queue(connection=redis_conn)
 
+
+
+def search_text_in_data(search_text):
+    try:
+        db_conn = psycopg2.connect(**db_params)
+        db_cursor = db_conn.cursor()
+
+        # Using parameterized query to prevent SQL injection
+        search_query = "SELECT url, content FROM scraped_data WHERE content ILIKE %s"
+        data = ('%' + search_text + '%',)
+        db_cursor.execute(search_query, data)
+        rows = db_cursor.fetchall()
+
+        db_conn.close()
+        return rows
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)
+        return []
+
+
+
 def list_all_tables():
     try:
         db_conn = psycopg2.connect(**db_params)
