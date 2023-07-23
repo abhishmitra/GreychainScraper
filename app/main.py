@@ -1,7 +1,7 @@
 # docker run -h 0.0.0.0 --name redis-server -d redis
 # rq worker --url redis://0.0.0.0:6379
 from database_file import *
-from worker import background_task
+from worker import *
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -12,7 +12,7 @@ def scrape():
     if not url:
         return jsonify({"error": "URL parameter is missing."}), 400
 
-    job = queue.enqueue(background_task, url)
+    queue.enqueue(scrape_and_enqueue, [url], 10) #(background_task, url)
     return jsonify("Scraping started"), 200
 
 
