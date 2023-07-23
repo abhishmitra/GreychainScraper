@@ -11,12 +11,12 @@ db_params = {
     'dbname': 'greychain',
     'user': 'postgres',
     'password': 'postgres',
-    'host': '0.0.0.0',
-    'port': '5432'
+    'host': '0.0.0.0', #'pdb',
+    'port': '5432',
+    'connect_timeout': 10
 }
-redis_conn = Redis(host = "0.0.0.0", port = 6379)
-queue = Queue(connection=redis_conn)
-
+#queue = Queue(connection=Redis(host="redis", port=6379))
+queue = Queue(connection=Redis(host="0.0.0.0", port=6379))
 
 
 def search_text_in_data(search_text):
@@ -110,3 +110,21 @@ def insert_row(url, content):
     except psycopg2.Error as e:
         print("Error connecting to the database:", e)
         return False
+
+
+def get_unique_urls():
+    unique_urls = []
+    try:
+        db_conn = psycopg2.connect(**db_params)
+        db_cursor = db_conn.cursor()
+
+        select_query = "SELECT DISTINCT url FROM scraped_data"
+        db_cursor.execute(select_query)
+
+        unique_urls = [row[0] for row in db_cursor.fetchall()]
+
+        db_conn.close()
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)
+
+    return set(unique_urls)
