@@ -1,6 +1,6 @@
 version: '3'
 services:
-  db:
+  pdb:
     image: postgres:14.1-alpine
     environment:
       - POSTGRES_USER=postgres
@@ -21,24 +21,20 @@ services:
       dockerfile: Dockerfile-api
     ports:
       - "5000:5000"
-
     environment:
       REDIS_URL: redis://redis:6379
-    
     depends_on:
       - redis
-      - db
+      - pdb
   worker:
     build:
       context: app
       dockerfile: Dockerfile-worker
-
     environment:
       REDIS_URL: redis://redis:6379
-
     depends_on:
       - redis
-      - db
+      - pdb
 volumes:
   db:
     driver: local
