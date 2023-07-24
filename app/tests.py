@@ -34,20 +34,6 @@ class TestExtractChildUrls(unittest.TestCase):
 
         self.assertCountEqual(child_urls, expected_urls)
 
-"""
-class TestWebScraping(unittest.TestCase):
-    def test_scrape_and_enqueue(self):
-        test_urls = [
-            "https://example.com",
-            "https://example.com/page1",
-            "https://example.com/page2",
-        ]
 
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(scrape_and_enqueue(test_urls))
-
-        visited_urls = get_unique_urls()
-        self.assertEqual(len(visited_urls), len(test_urls))
-"""
 if __name__ == '__main__':
     unittest.main()
