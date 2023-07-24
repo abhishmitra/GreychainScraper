@@ -10,6 +10,7 @@ Install requirements
 `pip install -r requirements.txt`
 
 Launch web server
+
 `python3 main.py`
 
 Launch rq worker
