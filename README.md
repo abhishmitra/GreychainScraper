@@ -27,6 +27,13 @@ postgres - Used to store the scraped results
    
 `python3 -m unittest discover`
 
+One additional step is the creation of the database on postgres. This was currently done manually using pgadmin4. Without this, the api container will not be able to connect with the postgres instance. Once the database is created the first command should bring up all the necessary services.
+
+
+## Endpoints
+1. /scrape?url=<URL>
+
+2. /search?text=<text>
 
 ## Todo
 1. Use an ORM for the database queries
