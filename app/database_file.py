@@ -2,8 +2,6 @@ import psycopg2
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urljoin
-from rq import Queue
-from redis import Redis
 import re
 
 # PostgreSQL database configuration
@@ -14,8 +12,6 @@ db_params = {
     'host': '0.0.0.0',
     'port': '5432'
 }
-queue = Queue(connection=Redis(host="0.0.0.0", port=6379))
-#queue = Queue(connection=Redis(host="0.0.0.0", port=6379))
 
 
 def search_text_in_data(search_text):
@@ -127,3 +123,99 @@ def get_unique_urls():
         print("Error connecting to the database:", e)
 
     return set(unique_urls)
+
+
+
+def delete_all_rows():
+    try:
+        with psycopg2.connect(**db_params) as db_conn:
+            with db_conn.cursor() as db_cursor:
+                delete_query = "DELETE FROM scraped_data"
+                db_cursor.execute(delete_query)
+                db_conn.commit()
+        print("All rows deleted successfully.")
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)
+
+def fetch_non_empty_text_rows():
+    empty_text_rows = []
+    try:
+        db_conn = psycopg2.connect(**db_params)
+        db_cursor = db_conn.cursor()
+
+        select_query = "SELECT url FROM scraped_data WHERE content IS NOT NULL AND url != ''"
+        db_cursor.execute(select_query)
+        rows = db_cursor.fetchall()
+
+        empty_text_rows = [row[0] for row in rows]
+
+        db_conn.close()
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)
+
+    return empty_text_rows
+
+
+def count_empty_rows():
+    try:
+        db_conn = psycopg2.connect(**db_params)
+        db_cursor = db_conn.cursor()
+
+        count_query = "SELECT COUNT(*) FROM scraped_data WHERE content IS NULL"
+        db_cursor.execute(count_query)
+        count = db_cursor.fetchone()[0]
+
+        db_conn.close()
+
+        return count
+
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)
+        return -1
+
+
+def fetch_empty_text_rows(limit=100):
+    empty_text_rows = []
+    try:
+        db_conn = psycopg2.connect(**db_params)
+        db_cursor = db_conn.cursor()
+
+        select_query = "SELECT url FROM scraped_data WHERE content IS NULL AND url != '' LIMIT %s"
+        db_cursor.execute(select_query, (limit,))
+        rows = db_cursor.fetchall()
+
+        empty_text_rows = [row[0] for row in rows]
+
+        db_conn.close()
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)
+
+    return empty_text_rows
+
+def update_database_with_content(url, content):
+    try:
+            db_conn = psycopg2.connect(**db_params)
+            db_cursor = db_conn.cursor()
+
+            update_query = "UPDATE scraped_data SET content = %s WHERE url = %s"
+
+            db_cursor.execute(update_query, (content, url))
+            db_conn.commit()
+            db_conn.close()
+    except psycopg2.Error as e:
+        print("Error updating database:", e)
+
+
+def insert_urls_with_content(urls):
+    try:
+        db_conn = psycopg2.connect(**db_params)
+        db_cursor = db_conn.cursor()
+
+        insert_query = "INSERT INTO scraped_data (url, content) VALUES (%s, %s) ON CONFLICT DO NOTHING"
+        db_cursor.executemany(insert_query, urls)
+
+        db_conn.commit()
+        db_conn.close()
+
+    except psycopg2.Error as e:
+        print("Error connecting to the database:", e)

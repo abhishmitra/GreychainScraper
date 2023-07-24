@@ -1,47 +1,76 @@
-from bs4 import BeautifulSoup
+import asyncio
+import aiohttp
+import psycopg2
 from database_file import *
 import html2text
-import aiohttp
-import asyncio
-from main import visited_urls
+from bs4 import BeautifulSoup
 
-def scrape_and_enqueue(urls, batch_size=100):
-    async def scrape_url_async(session, url):
+
+def extract_child_urls(base_url, html_content):
+    valid_urls = []
+
+    # Create a BeautifulSoup object to parse the HTML content
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # Extract all anchor tags from the HTML
+    anchor_tags = soup.find_all('a', href=True)
+
+    for anchor in anchor_tags:
+        url = anchor['href']
+        # Join the URL with the base_url to handle relative URLs
+        absolute_url = urljoin(base_url, url)
+        # Use a regular expression to check if the URL is valid
+        if re.match(r'^https?://', absolute_url):
+            valid_urls.append(absolute_url)
+
+    return valid_urls
+
+async def scrape_url_async(session, url):
+    try:
+        async with session.get(url, timeout = 5) as response:
+            content = await response.text()
+
+            text = html2text.html2text(content)
+            child_urls = extract_child_urls(url, content)
+
+            update_database_with_content(url, text)
+
+            child_urls = [(url, None) for url in child_urls if url not in visited_urls]
+            insert_urls_with_content(child_urls)
+
+            visited_urls.add(url)
+    except Exception as ex:
+        pass
+
+async def process_urls(urls):
+    async with aiohttp.ClientSession() as session:
+        tasks = [scrape_url_async(session, url) for url in urls]
+        await asyncio.gather(*tasks)
+
+async def worker():
+    while True:
         try:
-            async with session.get(url, timeout = 10) as response:
-                content = await response.text()
-                insert_row(url, html2text.html2text(content))
-                visited_urls.add(url)
+            print("\nVisited URLs: ", len(visited_urls))
+            print("Empty rows: ", count_empty_rows() )
 
-                child_urls = extract_child_urls(url, content)
-                print("\nVisited: ", len(visited_urls))
-                print("Child URLs: ", len(child_urls))
-                print("Queue Length: ", len(queue.jobs))
+            rows = fetch_empty_text_rows(limit = 400)
+            if not rows:
+                await asyncio.sleep(1)
+                continue
 
-                for i in range(0, len(child_urls), batch_size):
-                    batch = child_urls[i:i + batch_size]
-                    queue.enqueue(scrape_and_enqueue, batch, batch_size)
+            await process_urls(rows)
+        except Exception as e:
+            import traceback
+            print("Error: ", e)
+            await asyncio.sleep(1)
 
-        except Exception as ex:
-            print("Exception: ", str(ex))
-            pass
+if __name__ == '__main__':
+    import time
 
-    async def main():
-        async with aiohttp.ClientSession() as session:
-            tasks = [scrape_url_async(session, url) for url in urls if url not in visited_urls]
-            await asyncio.gather(*tasks)
+    print("Background worker started")
+    time.sleep(15)
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    delete_all_rows()
 
-def extract_child_urls(url, content):
-    url_list = []
-    soup = BeautifulSoup(content, 'html.parser')
-    for element in soup.find_all(['a']):
-        try:
-            joined_url = urljoin(url, element['href'])
-            if (joined_url not in visited_urls) and (joined_url not in url_list):
-                url_list.append(joined_url)
-        except Exception as ex:
-            pass
-    return url_list
+    visited_urls = get_unique_urls()
+    asyncio.run(worker())

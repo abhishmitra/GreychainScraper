@@ -2,11 +2,10 @@
 # rq worker --url redis://0.0.0.0:6379
 from worker import *
 from flask import Flask, request, jsonify
+from database_file import *
 import time
 
 time.sleep(15)
-queue.empty()
-visited_urls = get_unique_urls()
 
 app = Flask(__name__)
 
@@ -15,7 +14,9 @@ def scrape():
     url = request.args.get('url')
     if not url:
         return jsonify({"error": "URL parameter is missing."}), 400
-    queue.enqueue(scrape_and_enqueue, args = ([url], 100), timeout = 30)
+    insert_urls_with_content(
+        [(url, None)]
+    )
     return jsonify("Scraping started"), 200
 
 
