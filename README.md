@@ -1,11 +1,9 @@
 # WebCrawler
-This is an asynchronous web scraper that can currently scrape between 50 and 100 urls a second. It consists of 4 services:
+This is an asynchronous web scraper that can currently scrape between 50 and 100 urls a second. It consists of 3 services:
 
-api - A webserver that accepts scraping and searching requests
+api - A webserver that accepts scraping and searching requests. Sites that require scraping are added to the postgres db with empty content.
 
-worker - An rq worker that processes web scraping requests sent to a redis queue
-
-redis - Used for storing the list of sites to scrape
+worker - A background worker that scrapes urls in batches of 400. It finds rows with empty content
 
 postgres - Used to store the scraped results
 
