@@ -6,6 +6,7 @@ redis - Used for storing the list of sites to scrape
 postgres - Used to store the scraped results
 
 
+![Screenshot 2023-07-24 160819](https://github.com/abhishmitra/WebCrawler/assets/4780519/d22d2e1f-7729-4a67-aa53-b2c6c548f69e)
 
 
 ## Steps 
