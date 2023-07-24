@@ -31,9 +31,9 @@ One additional step is the creation of the database on postgres. This was curren
 
 
 ## Endpoints
-1. /scrape?url=<URL>
+1. /scrape?url=<<URL>>
 
-2. /search?text=<text>
+2. /search?text=<<text>>
 
 ## Todo
 1. Use an ORM for the database queries
