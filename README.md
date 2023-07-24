@@ -5,24 +5,23 @@ This is an asynchronous web scraper that can currently scrape between 50 and 100
 
 ## Steps 
 
-Launch redis and postgres
+1. Launch redis and postgres
 
 `docker compose build --up`
 
-Use pgadmin4 or psql to create the database which will be used. In this case it's called 'greychain'
+2. Use pgadmin4 or psql to create the database which will be used. In this case it's called 'greychain'
 
-Install requirements
+3. Install requirements
 
 `cd app`
 
 `pip install -r requirements.txt`
 
-
-Launch web server
+4. Launch web server
 
 `python3 main.py`
 
-Launch rq worker
+5. Launch rq worker
 
 `rq worker --url redis://0.0.0.0:6379`
 
