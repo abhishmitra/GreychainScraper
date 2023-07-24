@@ -9,6 +9,8 @@ Launch redis and postgres
 
 `docker compose build --up`
 
+Use pgadmin4 or psql to create the database which will be used. In this case it's called 'greychain'
+
 Install requirements
 
 `cd app`
