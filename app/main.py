@@ -4,7 +4,6 @@ from database_file import *
 from worker import *
 from flask import Flask, request, jsonify
 
-queue.empty()
 app = Flask(__name__)
 
 @app.route('/scrape', methods=['GET'])
@@ -12,8 +11,7 @@ def scrape():
     url = request.args.get('url')
     if not url:
         return jsonify({"error": "URL parameter is missing."}), 400
-    queue.enqueue(scrape_and_enqueue, args = ([url], 100), timeout = 30) #(background_task, url)
-
+    queue.enqueue(scrape_and_enqueue, args = ([url], 100), timeout = 30)
     return jsonify("Scraping started"), 200
 
 

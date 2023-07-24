@@ -41,7 +41,7 @@ def extract_child_urls(url, content):
     for element in soup.find_all(['a']):
         try:
             joined_url = urljoin(url, element['href'])
-            if (joined_url not in visited_urls) and (joined_url not in url_list):
+            if (joined_url not in url_list):
                 url_list.append(joined_url)
         except Exception as ex:
             pass
