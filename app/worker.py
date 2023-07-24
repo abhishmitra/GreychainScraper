@@ -3,8 +3,7 @@ from database_file import *
 import html2text
 import aiohttp
 import asyncio
-
-visited_urls = get_unique_urls()
+from main import visited_urls
 
 def scrape_and_enqueue(urls, batch_size=100):
     async def scrape_url_async(session, url):

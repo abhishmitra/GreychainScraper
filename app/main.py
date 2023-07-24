@@ -1,8 +1,12 @@
 # docker run -h 0.0.0.0 --name redis-server -d redis
 # rq worker --url redis://0.0.0.0:6379
-from database_file import *
 from worker import *
 from flask import Flask, request, jsonify
+import time
+
+time.sleep(15)
+queue.empty()
+visited_urls = get_unique_urls()
 
 app = Flask(__name__)
 
@@ -26,6 +30,7 @@ def search():
 
 
 if __name__ == '__main__':
+
     if verify_database_connection():
         create_tables_if_not_exist()
         app.run(host = "0.0.0.0", debug=True)

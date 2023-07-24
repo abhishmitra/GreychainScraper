@@ -5,3 +5,4 @@ redis==3.5.3
 psycopg2==2.9.1
 rq==1.11.0
 html2text
+aiohttp

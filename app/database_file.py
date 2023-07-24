@@ -8,15 +8,14 @@ import re
 
 # PostgreSQL database configuration
 db_params = {
-    'dbname': 'scraper',
+    'dbname': 'greychain',
     'user': 'postgres',
     'password': 'postgres',
-    'host': '0.0.0.0', #'pdb',
-    'port': '5432',
-    'connect_timeout': 10
+    'host': '0.0.0.0',
+    'port': '5432'
 }
-#queue = Queue(connection=Redis(host="redis", port=6379))
 queue = Queue(connection=Redis(host="0.0.0.0", port=6379))
+#queue = Queue(connection=Redis(host="0.0.0.0", port=6379))
 
 
 def search_text_in_data(search_text):
