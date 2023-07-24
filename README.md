@@ -26,6 +26,7 @@ This is an asynchronous web scraper that can currently scrape between 50 and 100
 `rq worker --url redis://0.0.0.0:6379`
 
 6. Run tests
+   
 `python3 -m unittest discover`
 
 
