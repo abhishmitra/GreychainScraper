@@ -27,3 +27,4 @@ Launch rq worker
 
 ## Todo
 1. Complete containerization of api and worker code
+2. Use an ORM for the database queries
